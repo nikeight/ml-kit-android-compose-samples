@@ -65,7 +65,9 @@ fun ChatScreen(
                     ChatBubbleItem(
                         modifier = Modifier.animateItemPlacement(),
                         isChatLoading = chatUiState.isLoading ?: false,
-                        messageEntity = chatMsg
+                        messageEntity = chatMsg,
+                        isError = chatUiState.isError,
+                        errorMessage = chatUiState.error?.message ?: "Something went wrong"
                     )
                 }
             }

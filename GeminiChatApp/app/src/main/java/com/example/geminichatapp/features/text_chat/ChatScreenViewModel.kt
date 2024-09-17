@@ -45,26 +45,6 @@ class ChatScreenViewModel @Inject constructor(
     }
 
     private fun collectLatestMsg() {
-        viewModelScope.launch {
-            _channelId?.let { safeChannelId ->
-                repository.fetchAllHistory(safeChannelId)
-                    .distinctUntilChanged()
-                    .collectLatest { newMessage ->
-                        newMessage?.let { newMessagesList ->
-                            _uiState.value = _uiState.value.copy(
-                                chatList = newMessagesList,
-                            )
-                            if (newMessage.isNotEmpty()) {
-                                updateChannel(
-                                    newMessagesList.last().id,
-                                    messageLastDate = newMessagesList.last().date
-                                )
-                            }
-                        }
-                    }
-            }
-        }
-
         // Convert list of Item to Map
         viewModelScope.launch {
             _channelId?.let { safeChannelId ->
@@ -74,14 +54,11 @@ class ChatScreenViewModel @Inject constructor(
                         newMessage?.let { newMessagesList ->
                             newMessagesList.forEach {
                                 _uiState.value = _uiState.value.copy(
-                                    chatListWithDate = mutableMapOf<String, List<MessageEntity>>(
+                                    chatListWithDate = mutableMapOf(
                                         it.date.getDateAsYearMonthDay() to newMessagesList
                                     )
                                 )
                             }
-                            _uiState.value = _uiState.value.copy(
-                                chatList = newMessagesList,
-                            )
                             if (newMessage.isNotEmpty()) {
                                 updateChannel(
                                     newMessagesList.last().id,

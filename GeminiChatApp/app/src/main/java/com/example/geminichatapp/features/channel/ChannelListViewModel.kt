@@ -3,14 +3,11 @@ package com.example.geminichatapp.features.channel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.geminichatapp.common.UiState
-import com.example.geminichatapp.data.model.ChannelWithMessage
 import com.example.geminichatapp.data.repo.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -41,5 +38,10 @@ class ChannelListViewModel @Inject constructor(
                     )
                 }
         }
+    }
+
+    // TODO: Implement the sorting
+    fun sortChatViaDates(){
+
     }
 }

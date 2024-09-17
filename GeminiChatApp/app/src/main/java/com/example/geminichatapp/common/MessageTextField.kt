@@ -1,14 +1,11 @@
 package com.example.geminichatapp.common
 
 import android.icu.util.Calendar
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
@@ -31,13 +28,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.example.geminichatapp.R
 import com.example.geminichatapp.data.model.MessageEntity
 import com.example.geminichatapp.data.model.Participant
+import com.example.geminichatapp.ui.components.LocalImageView
+import com.example.geminichatapp.util.decodeUriToFilePath
 import com.example.geminichatapp.util.getCurrentDate
 import com.example.geminichatapp.util.getCurrentTime
 import java.util.UUID
@@ -49,16 +49,35 @@ fun MessageTextField(
     onSendImagePrompt: (MessageEntity) -> Unit,
     channelId: UUID,
 ) {
+    val context = LocalContext.current
     var userMessage by rememberSaveable { mutableStateOf("") }
-    var imageUris = rememberSaveable(saver = UriSaver()) { mutableStateListOf() }
+    var imageUris = rememberSaveable(saver = FilePathSaver()) { mutableStateListOf() }
 
+//        ActivityResultContracts.PickVisualMedia()
     val pickMedia = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickVisualMedia()
+        contract = ActivityResultContracts.OpenDocument()
     ) { imageUri ->
-        imageUri?.let {
-            imageUris.add(it)
+        imageUri?.let { uri ->
+            val filePath = decodeUriToFilePath(context, uri)
+            filePath?.let { path ->
+                imageUris.add(path)
+            }
         }
     }
+
+//    val pickMedia = rememberLauncherForActivityResult(
+//        ActivityResultContracts.StartActivityForResult()
+//    ) { result ->
+//        if (result.resultCode == RESULT_OK) {
+//            val imageData = result.data
+//            if (imageData != null) {
+//                val imageFilePath = imageData.data
+//                imageFilePath?.let { pathUri ->
+//                    imageUris.add(pathUri)
+//                }
+//            }
+//        }
+//    }
 
     ElevatedCard(
         modifier = modifier
@@ -70,12 +89,9 @@ fun MessageTextField(
                     modifier = Modifier.padding(all = 8.dp)
                 ) {
                     items(imageUris) { imageUri ->
-                        AsyncImage(
-                            model = imageUri,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .padding(4.dp)
-                                .requiredSize(72.dp)
+                        LocalImageView(
+                            imageSize = Size(width = 72f, height = 72f),
+                            filePath = imageUri,
                         )
                     }
                 }
@@ -89,8 +105,14 @@ fun MessageTextField(
         ) {
             IconButton(
                 onClick = {
+//                    pickMedia.launch(
+//                        PickVisualMediaRequest(
+//                            ActivityResultContracts.PickVisualMedia.ImageOnly
+//                        )
+//                    )
+
                     pickMedia.launch(
-                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        arrayOf("image/*")
                     )
                 },
                 modifier = Modifier
@@ -125,13 +147,11 @@ fun MessageTextField(
                                 message = userMessage,
                                 byWhom = Participant.USER,
                                 foreignChannelId = channelId,
-                                images = imageUris.map {
-                                    it.toString()
-                                }
+                                images = imageUris
                             )
                         )
                         userMessage = ""
-                        imageUris = emptyList<Uri>().toMutableList()
+                        imageUris = mutableListOf()
                     } else
                         if (userMessage.isNotBlank()) {
                             val currentDate = getCurrentDate()
@@ -163,11 +183,9 @@ fun MessageTextField(
     }
 }
 
-class UriSaver : Saver<MutableList<Uri>, List<String>> {
-    override fun restore(value: List<String>): MutableList<Uri> = value.map {
-        Uri.parse(it)
-    }.toMutableList()
+class FilePathSaver : Saver<MutableList<String>, List<String>> {
+    override fun restore(value: List<String>): MutableList<String> = value.toMutableList()
 
-    override fun SaverScope.save(value: MutableList<Uri>): List<String> =
+    override fun SaverScope.save(value: MutableList<String>): List<String> =
         value.map { it.toString() }
 }

@@ -116,7 +116,9 @@ class RepositoryImpl @Inject constructor(
     @RequiresApi(Build.VERSION_CODES.P)
     override suspend fun sendImagePrompt(messageEntity: MessageEntity) {
         // Cache the User Message to the history as well
-        localService.addMessage(messageEntity)
+        localService.addMessage(
+            messageEntity,
+        )
 
         val bitmaps = messageEntity.images?.map {
             val imageRequest = imageRequestBuilder
@@ -144,10 +146,12 @@ class RepositoryImpl @Inject constructor(
             text(messageEntity.message)
         }
         val imageGptResponse = networkService.sendImagePrompt(content)
+
         /**
          * We want to add images to the Model response as well, to filter it out later
          * As when we provide a history to the TextChat Model, we will exclude the things which was
          * related to images.
+         * Filter is happening in the UI Layer
          */
         imageGptResponse.text?.let { response ->
             localService.addMessage(

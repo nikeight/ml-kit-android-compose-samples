@@ -66,6 +66,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.camera.mlkit.vision)
+    implementation(libs.play.services.mlkit.text.recognition.common)
+    implementation(libs.play.services.mlkit.text.recognition)
     testImplementation(libs.junit)
 
     val navVersion = "2.7.7"
@@ -79,7 +81,7 @@ dependencies {
     implementation("androidx.camera:camera-extensions:$cameraxVersion")
 
     // Bar Code Scanning
-    implementation("com.google.mlkit:barcode-scanning:17.2.0")
+    implementation("com.google.mlkit:barcode-scanning:17.3.0")
 
     // DI: Hilt
     implementation("com.google.dagger:hilt-android:2.48")

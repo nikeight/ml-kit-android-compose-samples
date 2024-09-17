@@ -40,7 +40,7 @@ object GeminiModule {
         config: GenerationConfig
     ) = GenerativeModel(
         // The Gemini 1.5 models are versatile and work with most use cases
-        modelName = "gemini-1.0-pro-vision-latest",
+        modelName = "gemini-1.5-flash",
         apiKey = BuildConfig.GEMINI_API_KEY,
         generationConfig = config
     )
