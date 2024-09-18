@@ -17,7 +17,7 @@ class ChannelListViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<UiState> =
-        MutableStateFlow(UiState(isInitialState = true))
+        MutableStateFlow(UiState())
 
     val uiState: StateFlow<UiState> =
         _uiState.asStateFlow()
@@ -27,9 +27,6 @@ class ChannelListViewModel @Inject constructor(
     }
 
     private fun fetchChannelsList() {
-        _uiState.value = UiState(
-            isLoading = true
-        )
         viewModelScope.launch {
             repository.fetchChannels()
                 .collect {

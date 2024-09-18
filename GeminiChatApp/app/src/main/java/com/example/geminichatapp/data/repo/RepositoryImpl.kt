@@ -14,11 +14,15 @@ import com.example.geminichatapp.data.model.ChannelEntity
 import com.example.geminichatapp.data.model.ChannelWithMessage
 import com.example.geminichatapp.data.model.MessageEntity
 import com.example.geminichatapp.data.model.Participant
+import com.example.geminichatapp.data.model.toEntity
+import com.example.geminichatapp.data.model.toMessage
 import com.example.geminichatapp.data.remote.INetworkService
+import com.example.geminichatapp.features.text_chat.Message
 import com.google.ai.client.generativeai.type.content
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import java.util.UUID
 import javax.inject.Inject
@@ -49,8 +53,12 @@ class RepositoryImpl @Inject constructor(
         return localService.updateChannel(channelEntity)
     }
 
-    override suspend fun fetchAllHistory(id: UUID): Flow<List<MessageEntity>?> {
-        return localService.loadChats(id)
+    override suspend fun fetchAllHistory(id: UUID): Flow<List<Message>?> {
+        return localService.loadChats(id).map { msgEntityList ->
+            msgEntityList.map { msgEntity ->
+                msgEntity.toMessage()
+            }
+        }
     }
 
     /**
@@ -58,22 +66,25 @@ class RepositoryImpl @Inject constructor(
      * Get the response from the GPT
      * Save to the DB the new message
      */
-    override suspend fun sendMessage(messageEntity: MessageEntity) {
+    override suspend fun sendMessage(messageEntity: MessageEntity): Flow<MessageState> = flow {
         // Cache the User Message to the history as well
         localService.addMessage(messageEntity)
 
         // Creating the Loading effect First
-        val newGeneratedMessage: MessageEntity = MessageEntity(
+        val newGeneratedMessage = Message(
             time = messageEntity.time,
             date = messageEntity.date,
             images = messageEntity.images,
             byWhom = Participant.MODEL,
-            message = "Generating...",
-            foreignChannelId = messageEntity.foreignChannelId
+            message = "Generating",
+            foreignChannelId = messageEntity.foreignChannelId,
         )
 
-        localService.addMessage(newGeneratedMessage)
+        emit(MessageState.Loading)
 
+
+        // Todo : Take History based on the channels only
+        // Not all the data
         val historyUpTo = localService.loadHistory()
         try {
             val gptResponseWithContext = networkService.sendMessage(
@@ -91,21 +102,23 @@ class RepositoryImpl @Inject constructor(
 
             // Cache the Model message to the local DB
             gptResponseWithContext.text?.let { successResponse ->
+                emit(
+                    MessageState.Success,
+                )
+
                 localService.addMessage(
-                    newGeneratedMessage.copy(
-                        message = successResponse,
+                    newGeneratedMessage.toEntity().copy(
+                        images = emptyList(),
+                        message = successResponse
                     )
                 )
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            localService.addMessage(
-                newGeneratedMessage.copy(
-                    message = "Error : ${e.message}"
-                )
+            emit(
+                MessageState.Failure,
             )
         }
-
     }
 
     /**

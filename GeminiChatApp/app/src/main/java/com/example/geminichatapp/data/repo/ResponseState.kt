@@ -5,3 +5,9 @@ sealed class ResponseState<T> {
     data class Success<T>(val data: T) : ResponseState<T>()
     data class Failure(val error: Exception) : ResponseState<Exception>()
 }
+
+sealed class MessageState {
+    data object Loading : MessageState()
+    data object Success : MessageState()
+    data object Failure : MessageState()
+}

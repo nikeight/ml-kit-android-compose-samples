@@ -1,5 +1,6 @@
 package com.example.geminichatapp.features.text_chat
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +18,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.geminichatapp.common.ChatBubbleItem
 import com.example.geminichatapp.common.ChatStickyHeader
 import com.example.geminichatapp.common.MessageTextField
+import com.example.geminichatapp.ui.components.ErrorMessage
+import com.example.geminichatapp.ui.components.MessageGeneratingAnimation
 import java.util.UUID
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -52,7 +55,7 @@ fun ChatScreen(
         }
     ) {
         LazyColumn(
-            reverseLayout = true,
+            reverseLayout = false,
             state = listState,
             modifier = modifier.padding(it),
             verticalArrangement = Arrangement.Center
@@ -61,14 +64,19 @@ fun ChatScreen(
                 stickyHeader {
                     ChatStickyHeader(heading = key)
                 }
-                items(list.reversed()) { chatMsg ->
+                items(list) { chatMsg ->
                     ChatBubbleItem(
                         modifier = Modifier.animateItemPlacement(),
-                        isChatLoading = chatUiState.isLoading ?: false,
                         messageEntity = chatMsg,
-                        isError = chatUiState.isError,
-                        errorMessage = chatUiState.error?.message ?: "Something went wrong"
                     )
+                }
+            }
+            item {
+                AnimatedVisibility(visible = chatUiState.isError) {
+                    ErrorMessage()
+                }
+                AnimatedVisibility(visible = chatUiState.loading) {
+                    MessageGeneratingAnimation()
                 }
             }
         }

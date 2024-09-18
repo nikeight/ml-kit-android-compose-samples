@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.geminichatapp.common.UiState
 import com.example.geminichatapp.data.model.ChannelEntity
 import com.example.geminichatapp.data.model.MessageEntity
+import com.example.geminichatapp.data.repo.MessageState
 import com.example.geminichatapp.data.repo.Repository
 import com.example.geminichatapp.util.getDateAsYearMonthDay
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Date
 import java.util.UUID
@@ -24,18 +26,49 @@ class ChatScreenViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<UiState> =
-        MutableStateFlow(UiState(isInitialState = true))
+        MutableStateFlow(UiState())
 
     val uiState: StateFlow<UiState> =
         _uiState.asStateFlow()
 
     private var _channelId: UUID? = null
 
+    // Todo : Make it MVI based arch, Single Interface method which send the text and image
     fun sendMessage(
         messageEntity: MessageEntity,
     ) {
         viewModelScope.launch {
             repository.sendMessage(messageEntity)
+                .collectLatest { msgState ->
+                    when (msgState) {
+                        is MessageState.Loading -> {
+                            _uiState.update {
+                                it.copy(
+                                    loading = true,
+                                    isError = false
+                                )
+                            }
+                        }
+
+                        is MessageState.Success -> {
+                            _uiState.update {
+                                it.copy(
+                                    loading = false,
+                                    isError = false
+                                )
+                            }
+                        }
+
+                        is MessageState.Failure -> {
+                            _uiState.update {
+                                it.copy(
+                                    loading = false,
+                                    isError = true
+                                )
+                            }
+                        }
+                    }
+                }
         }
     }
 
@@ -55,7 +88,7 @@ class ChatScreenViewModel @Inject constructor(
                             newMessagesList.forEach {
                                 _uiState.value = _uiState.value.copy(
                                     chatListWithDate = mutableMapOf(
-                                        it.date.getDateAsYearMonthDay() to newMessagesList
+                                        it.date.getDateAsYearMonthDay() to newMessagesList.toMutableList()
                                     )
                                 )
                             }

@@ -32,21 +32,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.geminichatapp.R
-import com.example.geminichatapp.data.model.MessageEntity
 import com.example.geminichatapp.data.model.Participant
+import com.example.geminichatapp.features.text_chat.Message
 import com.example.geminichatapp.ui.components.AvatarsImage
 import com.example.geminichatapp.ui.components.LocalImageView
-import com.example.geminichatapp.ui.components.MessageGeneratingAnimation
 
 @Composable
 fun ChatBubbleItem(
     modifier: Modifier = Modifier,
-    messageEntity: MessageEntity,
-    isChatLoading: Boolean,
-    isError: Boolean,
-    errorMessage: String,
+    messageEntity: Message,
 ) {
-    var imageSize by remember { mutableStateOf<Size>(Size(width = 180f, height = 90f)) }
+    var imageSize by remember { mutableStateOf(Size(width = 180f, height = 90f)) }
 
     LaunchedEffect(key1 = Unit) {
         val numberOfImages = messageEntity.images ?: 0
@@ -125,22 +121,16 @@ fun ChatBubbleItem(
                     Divider(Modifier.width(2.dp))
                 }
 
-                if (isChatLoading) {
-                    MessageGeneratingAnimation()
-                } else {
-                    // Chat Msg
-                    Text(
-                        text = messageEntity.message,
-                        modifier
-                            .fillMaxWidth()
-                            .padding(all = 24.dp),
-                        style = TextStyle(
-                            fontSize = 15.sp,
-                        ),
-                        textAlign = TextAlign.Start
-                    )
-                }
-
+                Text(
+                    text = messageEntity.message,
+                    modifier
+                        .fillMaxWidth()
+                        .padding(all = 24.dp),
+                    style = TextStyle(
+                        fontSize = 15.sp,
+                    ),
+                    textAlign = TextAlign.Start
+                )
             }
         }
     }
