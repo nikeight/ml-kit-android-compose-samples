@@ -22,8 +22,8 @@ class LocalServiceImpl @Inject constructor(
         return chatDao.loadChats(id)
     }
 
-    override suspend fun loadHistory(): List<MessageEntity?> {
-        return chatDao.loadHistory()
+    override suspend fun loadHistory(channelId : UUID): List<MessageEntity?> {
+        return chatDao.loadHistory(channelId)
     }
 
     override suspend fun addMessage(messageEntity: MessageEntity) {

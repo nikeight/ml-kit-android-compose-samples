@@ -70,22 +70,9 @@ class RepositoryImpl @Inject constructor(
         // Cache the User Message to the history as well
         localService.addMessage(messageEntity)
 
-        // Creating the Loading effect First
-        val newGeneratedMessage = Message(
-            time = messageEntity.time,
-            date = messageEntity.date,
-            images = messageEntity.images,
-            byWhom = Participant.MODEL,
-            message = "Generating",
-            foreignChannelId = messageEntity.foreignChannelId,
-        )
-
         emit(MessageState.Loading)
 
-
-        // Todo : Take History based on the channels only
-        // Not all the data
-        val historyUpTo = localService.loadHistory()
+        val historyUpTo = localService.loadHistory(messageEntity.foreignChannelId)
         try {
             val gptResponseWithContext = networkService.sendMessage(
                 messageContent = messageEntity.message,
@@ -107,10 +94,14 @@ class RepositoryImpl @Inject constructor(
                 )
 
                 localService.addMessage(
-                    newGeneratedMessage.toEntity().copy(
+                    Message(
+                        time = messageEntity.time,
+                        date = messageEntity.date,
                         images = emptyList(),
-                        message = successResponse
-                    )
+                        byWhom = Participant.MODEL,
+                        message = successResponse,
+                        foreignChannelId = messageEntity.foreignChannelId,
+                    ).toEntity()
                 )
             }
         } catch (e: Exception) {
@@ -170,7 +161,8 @@ class RepositoryImpl @Inject constructor(
             localService.addMessage(
                 messageEntity.copy(
                     message = response,
-                    byWhom = Participant.MODEL
+                    byWhom = Participant.MODEL,
+                    images = emptyList()
                 )
             )
         }

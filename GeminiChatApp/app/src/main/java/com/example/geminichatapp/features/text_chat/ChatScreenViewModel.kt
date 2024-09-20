@@ -87,15 +87,16 @@ class ChatScreenViewModel @Inject constructor(
                     .collectLatest { newMessage ->
                         newMessage?.let { newMessagesList ->
                             val map = mutableMapOf<String, MutableList<Message>>()
-                            newMessagesList.map {
-                                val date = it.date.getDateAsYearMonthDay()
-                                val msgList = map.getOrPut(date) { mutableListOf() }
-                                msgList.add(it)
-                                _uiState.update { state ->
-                                    state.copy(
-                                        chatListWithDate = map
-                                    )
-                                }
+                            newMessagesList.map { newMessage ->
+                                map.getOrPut(newMessage.date.getDateAsYearMonthDay()) { mutableListOf() }
+                                    .also {
+                                        it.add(newMessage)
+                                    }
+                            }
+                            _uiState.update { state ->
+                                state.copy(
+                                    chatListWithDate = map
+                                )
                             }
                             if (newMessage.isNotEmpty()) {
                                 updateChannel(

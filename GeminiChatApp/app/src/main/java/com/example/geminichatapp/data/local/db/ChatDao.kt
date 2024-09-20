@@ -20,10 +20,11 @@ interface ChatDao {
 
     /**
      * For Chat feature we don't want history which
-     * includes images
+     * includes images.
+     * Also belongs to the same channel id
      */
-    @Query("SELECT * FROM message WHERE images is NULL")
-    suspend fun loadHistory(): List<MessageEntity?>
+    @Query("SELECT * FROM message WHERE images is NULL AND foreignChannelId =:channelId")
+    suspend fun loadHistory(channelId : UUID): List<MessageEntity?>
 
     @Upsert
     suspend fun addMessage(messageEntity: MessageEntity)
