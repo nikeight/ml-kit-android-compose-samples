@@ -77,6 +77,7 @@ class ChatScreenViewModel @Inject constructor(
         collectLatestMsg()
     }
 
+    //TODO : To much of repeating loops, optimize it
     private fun collectLatestMsg() {
         // Convert list of Item to Map
         viewModelScope.launch {
@@ -85,12 +86,16 @@ class ChatScreenViewModel @Inject constructor(
                     .distinctUntilChanged()
                     .collectLatest { newMessage ->
                         newMessage?.let { newMessagesList ->
-                            newMessagesList.forEach {
-                                _uiState.value = _uiState.value.copy(
-                                    chatListWithDate = mutableMapOf(
-                                        it.date.getDateAsYearMonthDay() to newMessagesList.toMutableList()
+                            val map = mutableMapOf<String, MutableList<Message>>()
+                            newMessagesList.map {
+                                val date = it.date.getDateAsYearMonthDay()
+                                val msgList = map.getOrPut(date) { mutableListOf() }
+                                msgList.add(it)
+                                _uiState.update { state ->
+                                    state.copy(
+                                        chatListWithDate = map
                                     )
-                                )
+                                }
                             }
                             if (newMessage.isNotEmpty()) {
                                 updateChannel(

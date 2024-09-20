@@ -65,20 +65,6 @@ fun MessageTextField(
         }
     }
 
-//    val pickMedia = rememberLauncherForActivityResult(
-//        ActivityResultContracts.StartActivityForResult()
-//    ) { result ->
-//        if (result.resultCode == RESULT_OK) {
-//            val imageData = result.data
-//            if (imageData != null) {
-//                val imageFilePath = imageData.data
-//                imageFilePath?.let { pathUri ->
-//                    imageUris.add(pathUri)
-//                }
-//            }
-//        }
-//    }
-
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
@@ -105,12 +91,6 @@ fun MessageTextField(
         ) {
             IconButton(
                 onClick = {
-//                    pickMedia.launch(
-//                        PickVisualMediaRequest(
-//                            ActivityResultContracts.PickVisualMedia.ImageOnly
-//                        )
-//                    )
-
                     pickMedia.launch(
                         arrayOf("image/*")
                     )

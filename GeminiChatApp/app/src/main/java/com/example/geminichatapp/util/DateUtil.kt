@@ -7,7 +7,7 @@ import java.util.Date
 fun getCurrentDate(): Date = Calendar.getInstance().time
 
 // For Chat Bubble
-fun Date.getCurrentTime() : String {
+fun Date.getCurrentTime(): String {
     val calendar = Calendar.getInstance()
     calendar.time = this
     val hour = calendar.get(Calendar.HOUR)
@@ -28,7 +28,7 @@ fun Date.getDateAsYearMonthDay(): String {
     return buildString {
         append(year)
         append("-")
-        append(month)
+        append(month.plus(1))
         append("-")
         append(date)
     }

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -31,6 +30,12 @@ fun ChatScreen(
 ) {
     val chatUiState by chatScreenViewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
+
+    LaunchedEffect(chatUiState.chatListWithDate?.values?.size) {
+        chatUiState.chatListWithDate?.values?.size?.let { newScrollPosition ->
+            listState.animateScrollToItem(newScrollPosition)
+        }
+    }
 
     LaunchedEffect(key1 = Unit) {
         chatScreenViewModel.setChannelId(channelId)
@@ -64,12 +69,18 @@ fun ChatScreen(
                 stickyHeader {
                     ChatStickyHeader(heading = key)
                 }
-                items(list) { chatMsg ->
-                    ChatBubbleItem(
-                        modifier = Modifier.animateItemPlacement(),
-                        messageEntity = chatMsg,
-                    )
-                }
+                items(
+                    count = list.size,
+                    key = { index ->
+                        list[index].id
+                    },
+                    itemContent = { index ->
+                        ChatBubbleItem(
+                            modifier = Modifier.animateItemPlacement(),
+                            messageEntity = list[index],
+                        )
+                    }
+                )
             }
             item {
                 AnimatedVisibility(visible = chatUiState.isError) {
