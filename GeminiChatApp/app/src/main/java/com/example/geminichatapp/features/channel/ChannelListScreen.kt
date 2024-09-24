@@ -78,7 +78,6 @@ fun ChannelListScreen(
         ) {
             channelList.value.channelList?.let { channelList ->
                 items(channelList.reversed()) { channel ->
-                    println("UNIQUE ID FROM DB : ${channel.channelId}")
                     ChannelListItem(
                         channelWithMessage = channel,
                         navigateToChatScreen = { passedId ->

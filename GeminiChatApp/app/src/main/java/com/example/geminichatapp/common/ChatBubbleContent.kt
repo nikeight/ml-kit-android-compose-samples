@@ -38,7 +38,7 @@ fun ChatBubbleContent(
     Row(
         modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(vertical = 8.dp, horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
@@ -51,8 +51,7 @@ fun ChatBubbleContent(
         )
 
         Text(
-            modifier = modifier
-                .weight(1f),
+            modifier = modifier,
             text = msgDate,
             style = TextStyle(
                 fontSize = 14.sp,
@@ -85,11 +84,11 @@ fun ChatBubbleContent(
             text = textMsg,
             modifier
                 .fillMaxWidth()
-                .padding(all = 24.dp),
+                .padding(all = 16.dp),
             style = TextStyle(
                 fontSize = 15.sp,
             ),
-            maxLines = 2,
+            maxLines = numberOfLines,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Start
         )
@@ -97,7 +96,7 @@ fun ChatBubbleContent(
         text = textMsg,
         modifier
             .fillMaxWidth()
-            .padding(all = 24.dp),
+            .padding(all = 16.dp),
         style = TextStyle(
             fontSize = 15.sp,
         ),

@@ -10,11 +10,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
@@ -27,18 +22,6 @@ fun ChatBubbleItem(
     modifier: Modifier = Modifier,
     messageEntity: Message,
 ) {
-    var imageSize by remember { mutableStateOf(Size(width = 180f, height = 90f)) }
-
-    LaunchedEffect(key1 = Unit) {
-        val numberOfImages = messageEntity.images ?: 0
-        imageSize = when (numberOfImages) {
-            1 -> Size(width = 360f, height = 240f)
-            2 -> Size(width = 180f, height = 180f)
-            3 -> Size(width = 120f, height = 120f)
-            else -> Size(width = 90f, height = 90f)
-        }
-    }
-
     val isModelMessage = messageEntity.byWhom == Participant.MODEL ||
             messageEntity.byWhom == Participant.ERROR
 
@@ -75,7 +58,7 @@ fun ChatBubbleItem(
                 ChatBubbleContent(
                     textMsg = messageEntity.message,
                     imagesList = messageEntity.images,
-                    imageSize = imageSize,
+                    imageSize = Size(width = 180f, height = 180f),
                     participant = messageEntity.byWhom,
                     msgDate = messageEntity.time,
                     maxLines = null

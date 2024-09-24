@@ -10,10 +10,17 @@ fun getCurrentDate(): Date = Calendar.getInstance().time
 fun Date.getCurrentTime(): String {
     val calendar = Calendar.getInstance()
     calendar.time = this
-    val hour = calendar.get(Calendar.HOUR)
+    val hour = calendar.get(Calendar.HOUR).let { value ->
+        if (value >= 10) {
+            "$value"
+        } else {
+            "0$value"
+        }
+    }
     val minutes = calendar.get(Calendar.MINUTE)
     return buildString {
         append(hour)
+        append(":")
         append(minutes)
     }
 }

@@ -29,7 +29,7 @@ fun LocalImageView(
             )
         ),
         contentDescription = "chat_user_input_image",
-        contentScale = ContentScale.Fit,
+        contentScale = ContentScale.Crop,
         modifier = modifier
             .padding(4.dp)
             .requiredSize(

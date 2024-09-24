@@ -1,6 +1,5 @@
 package com.example.geminichatapp.common
 
-import android.icu.util.Calendar
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Row
@@ -51,9 +50,8 @@ fun MessageTextField(
 ) {
     val context = LocalContext.current
     var userMessage by rememberSaveable { mutableStateOf("") }
-    var imageUris = rememberSaveable(saver = FilePathSaver()) { mutableStateListOf() }
+    val imageUris = rememberSaveable(saver = FilePathSaver()) { mutableStateListOf() }
 
-//        ActivityResultContracts.PickVisualMedia()
     val pickMedia = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { imageUri ->
@@ -119,19 +117,23 @@ fun MessageTextField(
             )
             IconButton(
                 onClick = {
+                    // Todo : Better way of passing ImageList and clearing List
+                    // Todo : Better way of handling Dates
                     if (imageUris.isNotEmpty() && userMessage.isNotBlank()) {
+                        val currentDate = getCurrentDate()
+                        val imageList = imageUris.toList()
                         onSendImagePrompt(
                             MessageEntity(
-                                time = Calendar.getInstance().time.toString(),
-                                date = Calendar.getInstance().time,
+                                time = currentDate.getCurrentTime(),
+                                date = currentDate,
                                 message = userMessage,
                                 byWhom = Participant.USER,
                                 foreignChannelId = channelId,
-                                images = imageUris
+                                images = imageList
                             )
                         )
                         userMessage = ""
-                        imageUris = mutableListOf()
+                        imageUris.clear()
                     } else
                         if (userMessage.isNotBlank()) {
                             val currentDate = getCurrentDate()
