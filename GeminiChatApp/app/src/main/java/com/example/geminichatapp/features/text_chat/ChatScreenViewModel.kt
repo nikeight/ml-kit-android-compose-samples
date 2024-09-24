@@ -95,7 +95,7 @@ class ChatScreenViewModel @Inject constructor(
                             }
                             _uiState.update { state ->
                                 state.copy(
-                                    chatListWithDate = map
+                                    chatListWithDate = map,
                                 )
                             }
                             if (newMessage.isNotEmpty()) {
@@ -130,6 +130,7 @@ class ChatScreenViewModel @Inject constructor(
         }
     }
 
+    //Todo : Add Response Events same as text
     fun sendImagePrompt(messageEntity: MessageEntity) {
         viewModelScope.launch {
             repository.sendImagePrompt(messageEntity)

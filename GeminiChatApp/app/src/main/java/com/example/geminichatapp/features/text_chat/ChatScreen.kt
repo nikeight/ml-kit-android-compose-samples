@@ -31,10 +31,10 @@ fun ChatScreen(
     val chatUiState by chatScreenViewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
 
-    LaunchedEffect(chatUiState.chatListWithDate?.values?.size) {
-        chatUiState.chatListWithDate?.values?.size?.let { newScrollPosition ->
-            listState.animateScrollToItem(newScrollPosition)
-        }
+    LaunchedEffect(chatUiState.chatListWithDate) {
+        listState.animateScrollToItem(
+            listState.layoutInfo.totalItemsCount,
+        )
     }
 
     LaunchedEffect(key1 = Unit) {

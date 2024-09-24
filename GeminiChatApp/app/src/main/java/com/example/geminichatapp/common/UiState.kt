@@ -8,5 +8,5 @@ data class UiState(
     var chatListWithDate: MutableMap<String, MutableList<Message>>? = mutableMapOf(),
     var channelList: List<ChannelWithMessage>? = mutableListOf(),
     var loading: Boolean = false,
-    var isError : Boolean = false
+    var isError : Boolean = false,
 )
