@@ -50,10 +50,10 @@ fun Date.getDateAsDayDateAndMonth(): String {
     val month = calendar.get(Calendar.MONTH)
     return buildString {
         append(day.getDayFromCode())
-        append(",")
+        append(", ")
         append(date)
         append(" ")
-        append(month)
+        append(month.plus(1))
     }
 }
 

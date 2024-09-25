@@ -53,7 +53,7 @@ fun ChatBubbleItem(
             Card(
                 colors = CardDefaults.cardColors(containerColor = backgroundColor),
                 shape = bubbleShape,
-                modifier = Modifier.widthIn(0.dp, maxWidth * 0.9f)
+                modifier = Modifier.widthIn(0.dp, maxWidth * 0.8f)
             ) {
                 ChatBubbleContent(
                     textMsg = messageEntity.message,

@@ -89,10 +89,7 @@ class RepositoryImpl @Inject constructor(
 
             // Cache the Model message to the local DB
             gptResponseWithContext.text?.let { successResponse ->
-                emit(
-                    MessageState.Success,
-                )
-
+                emit(MessageState.Success)
                 localService.addMessage(
                     Message(
                         time = messageEntity.time,
@@ -118,11 +115,13 @@ class RepositoryImpl @Inject constructor(
      * Save to the DB the new message
      */
     @RequiresApi(Build.VERSION_CODES.P)
-    override suspend fun sendImagePrompt(messageEntity: MessageEntity) {
+    override suspend fun sendImagePrompt(messageEntity: MessageEntity): Flow<MessageState> = flow {
         // Cache the User Message to the history as well
         localService.addMessage(
             messageEntity,
         )
+
+        emit(MessageState.Loading)
 
         val bitmaps = messageEntity.images?.map {
             val imageRequest = imageRequestBuilder
@@ -138,6 +137,7 @@ class RepositoryImpl @Inject constructor(
                     return@map null
                 }
             } catch (e: Exception) {
+                emit(MessageState.Failure)
                 return@map null
             }
         }
@@ -149,21 +149,29 @@ class RepositoryImpl @Inject constructor(
             }
             text(messageEntity.message)
         }
-        val imageGptResponse = networkService.sendImagePrompt(content)
 
-        /**
-         * We want to add images to the Model response as well, to filter it out later
-         * As when we provide a history to the TextChat Model, we will exclude the things which was
-         * related to images.
-         * Filter is happening in the UI Layer
-         */
-        imageGptResponse.text?.let { response ->
-            localService.addMessage(
-                messageEntity.copy(
-                    message = response,
-                    byWhom = Participant.MODEL,
-                    images = emptyList()
+        try {
+            val imageGptResponse = networkService.sendImagePrompt(content)
+
+            /**
+             * Avoiding to save images to the Model Response,
+             * Not so required not only in UI but for
+             * Fetching history as well.
+             */
+            imageGptResponse.text?.let { response ->
+                emit(MessageState.Success)
+                localService.addMessage(
+                    messageEntity.copy(
+                        message = response,
+                        byWhom = Participant.MODEL,
+                        images = emptyList()
+                    )
                 )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emit(
+                MessageState.Failure,
             )
         }
     }

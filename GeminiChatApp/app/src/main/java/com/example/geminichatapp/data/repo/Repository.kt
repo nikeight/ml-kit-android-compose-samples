@@ -13,5 +13,5 @@ interface Repository {
     suspend fun updateChannel(channelEntity: ChannelEntity)
     suspend fun fetchAllHistory(id: UUID): Flow<List<Message>?>
     suspend fun sendMessage(messageEntity: MessageEntity) : Flow<MessageState>
-    suspend fun sendImagePrompt(messageEntity: MessageEntity)
+    suspend fun sendImagePrompt(messageEntity: MessageEntity) : Flow<MessageState>
 }

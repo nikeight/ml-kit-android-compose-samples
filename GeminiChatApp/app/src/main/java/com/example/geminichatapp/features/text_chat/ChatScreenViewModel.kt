@@ -9,6 +9,7 @@ import com.example.geminichatapp.data.repo.MessageState
 import com.example.geminichatapp.data.repo.Repository
 import com.example.geminichatapp.util.getDateAsYearMonthDay
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,42 +34,14 @@ class ChatScreenViewModel @Inject constructor(
 
     private var _channelId: UUID? = null
 
-    // Todo : Make it MVI based arch, Single Interface method which send the text and image
+    // Todo : Make it MVI based arch,
+    //  Single Interface method which send the text and image
     fun sendMessage(
         messageEntity: MessageEntity,
     ) {
         viewModelScope.launch {
             repository.sendMessage(messageEntity)
-                .collectLatest { msgState ->
-                    when (msgState) {
-                        is MessageState.Loading -> {
-                            _uiState.update {
-                                it.copy(
-                                    loading = true,
-                                    isError = false
-                                )
-                            }
-                        }
-
-                        is MessageState.Success -> {
-                            _uiState.update {
-                                it.copy(
-                                    loading = false,
-                                    isError = false
-                                )
-                            }
-                        }
-
-                        is MessageState.Failure -> {
-                            _uiState.update {
-                                it.copy(
-                                    loading = false,
-                                    isError = true
-                                )
-                            }
-                        }
-                    }
-                }
+                .collectLatestAndUpdateState(state = _uiState)
         }
     }
 
@@ -130,10 +103,43 @@ class ChatScreenViewModel @Inject constructor(
         }
     }
 
-    //Todo : Add Response Events same as text
     fun sendImagePrompt(messageEntity: MessageEntity) {
         viewModelScope.launch {
             repository.sendImagePrompt(messageEntity)
+                .collectLatestAndUpdateState(state = _uiState)
+        }
+    }
+}
+
+suspend fun Flow<MessageState>.collectLatestAndUpdateState(state: MutableStateFlow<UiState>) {
+    this.collectLatest { msgState ->
+        when (msgState) {
+            is MessageState.Loading -> {
+                state.update {
+                    it.copy(
+                        loading = true,
+                        isError = false
+                    )
+                }
+            }
+
+            is MessageState.Success -> {
+                state.update {
+                    it.copy(
+                        loading = false,
+                        isError = false
+                    )
+                }
+            }
+
+            is MessageState.Failure -> {
+                state.update {
+                    it.copy(
+                        loading = false,
+                        isError = true
+                    )
+                }
+            }
         }
     }
 }

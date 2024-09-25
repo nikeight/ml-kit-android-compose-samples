@@ -48,7 +48,7 @@ fun MessageGeneratingAnimation(
                     .offset(y = offset.dp)
                     .clip(CircleShape)
                     .background(
-                        color = Color.Gray,
+                        color = Color.White,
                         shape = CircleShape
                     )
             )
