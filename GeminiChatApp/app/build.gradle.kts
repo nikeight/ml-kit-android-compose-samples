@@ -62,6 +62,9 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    useLibrary("android.test.runner")
+    useLibrary("android.test.base")
 }
 
 dependencies {
@@ -96,11 +99,24 @@ dependencies {
     // Serialization
     implementation(libs.kotlinx.serialization.json)
 
+    //Test
+    implementation(libs.androidx.junit.ktx)
     testImplementation(libs.junit)
+    testImplementation (libs.core.testing)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation (libs.google.truth)
+
+    androidTestImplementation(libs.androidx.room.testing)
+    androidTestImplementation (libs.google.truth)
+    androidTestImplementation (libs.core.testing)
+    androidTestImplementation(libs.android.test.core.ktx)
+    androidTestImplementation(libs.androidx.runner)
+    androidTestImplementation(libs.androidx.rules)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
