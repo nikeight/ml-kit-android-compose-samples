@@ -12,6 +12,7 @@ import com.example.geminichatapp.data.model.MessageEntity
 import com.example.geminichatapp.data.model.Participant
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -112,10 +113,9 @@ class LocalServiceUnitTest {
     }
 
     @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
-    }
+    fun whenMessageAddedInInterval_CheckDbReturnsTheExpectedValue() = runTest {
 
+    }
 
     @After
     fun clearUp() {

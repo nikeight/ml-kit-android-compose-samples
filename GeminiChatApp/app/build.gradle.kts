@@ -105,6 +105,7 @@ dependencies {
     testImplementation (libs.core.testing)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation (libs.google.truth)
+    testImplementation(libs.mockk)
 
     androidTestImplementation(libs.androidx.room.testing)
     androidTestImplementation (libs.google.truth)

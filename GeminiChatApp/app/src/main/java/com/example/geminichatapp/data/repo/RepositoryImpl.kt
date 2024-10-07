@@ -1,14 +1,7 @@
 package com.example.geminichatapp.data.repo
 
-import android.content.Context
-import android.graphics.drawable.BitmapDrawable
-import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
-import coil.ImageLoader
-import coil.request.ImageRequest
-import coil.request.SuccessResult
-import coil.size.Precision
 import com.example.geminichatapp.data.local.LocalService
 import com.example.geminichatapp.data.model.ChannelEntity
 import com.example.geminichatapp.data.model.ChannelWithMessage
@@ -17,24 +10,23 @@ import com.example.geminichatapp.data.model.Participant
 import com.example.geminichatapp.data.model.toEntity
 import com.example.geminichatapp.data.model.toMessage
 import com.example.geminichatapp.data.remote.INetworkService
+import com.example.geminichatapp.data.util.UriToBitmapConverter
 import com.example.geminichatapp.features.text_chat.Message
 import com.google.ai.client.generativeai.type.content
-import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import java.util.UUID
 import javax.inject.Inject
 
 class RepositoryImpl @Inject constructor(
     private val networkService: INetworkService,
     private val localService: LocalService,
-    @ApplicationContext private val activityContext: Context,
+    private val uriToBitmapConverter: UriToBitmapConverter
 ) : Repository {
-
-    private val imageRequestBuilder = ImageRequest.Builder(activityContext)
-    private val imageLoader = ImageLoader.Builder(activityContext).build()
 
     override suspend fun fetchChannels(): Flow<List<ChannelWithMessage>> {
         return localService.fetchChannels().map {
@@ -66,7 +58,7 @@ class RepositoryImpl @Inject constructor(
      * Get the response from the GPT
      * Save to the DB the new message
      */
-    override suspend fun sendMessage(messageEntity: MessageEntity): Flow<MessageState> = flow {
+    override suspend fun sendMessage(messageEntity: MessageEntity) = flow {
         // Cache the User Message to the history as well
         localService.addMessage(messageEntity)
 
@@ -115,7 +107,9 @@ class RepositoryImpl @Inject constructor(
      * Save to the DB the new message
      */
     @RequiresApi(Build.VERSION_CODES.P)
-    override suspend fun sendImagePrompt(messageEntity: MessageEntity): Flow<MessageState> = flow {
+    override suspend fun sendImagePrompt(
+        messageEntity: MessageEntity,
+    ) = flow {
         // Cache the User Message to the history as well
         localService.addMessage(
             messageEntity,
@@ -123,24 +117,12 @@ class RepositoryImpl @Inject constructor(
 
         emit(MessageState.Loading)
 
-        val bitmaps = messageEntity.images?.map {
-            val imageRequest = imageRequestBuilder
-                .data(Uri.parse(it))
-                .size(size = 768)
-                .precision(Precision.EXACT)
-                .build()
-            try {
-                val result = imageLoader.execute(imageRequest)
-                if (result is SuccessResult) {
-                    return@map (result.drawable as BitmapDrawable).bitmap
-                } else {
-                    return@map null
-                }
-            } catch (e: Exception) {
-                emit(MessageState.Failure)
-                return@map null
-            }
+        val bitmaps = withContext(Dispatchers.Default) {
+            uriToBitmapConverter.convert(
+                messageEntity.images ?: emptyList(),
+            )
         }
+
         val content = content {
             bitmaps?.forEach { bitmap ->
                 bitmap?.let {
