@@ -7,7 +7,8 @@ import com.example.geminichatapp.data.repo.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,13 +21,17 @@ class ChannelListViewModel @Inject constructor(
         MutableStateFlow(UiState())
 
     val uiState: StateFlow<UiState> =
-        _uiState.asStateFlow()
+        _uiState
+            .onStart {
+                fetchChannelsList()
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
+                initialValue = UiState()
+            )
 
-    init {
-        fetchChannelsList()
-    }
-
-    private fun fetchChannelsList() {
+    private fun fetchChannelsList() =
         viewModelScope.launch {
             repository.fetchChannels()
                 .collect {
@@ -35,10 +40,10 @@ class ChannelListViewModel @Inject constructor(
                     )
                 }
         }
-    }
+
 
     // TODO: Implement the sorting
-    fun sortChatViaDates(){
+    fun sortChatViaDates() {
 
     }
 }

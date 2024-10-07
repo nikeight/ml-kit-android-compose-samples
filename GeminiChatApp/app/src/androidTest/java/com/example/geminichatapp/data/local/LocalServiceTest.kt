@@ -3,6 +3,7 @@ package com.example.geminichatapp.data.local
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.example.geminichatapp.data.local.db.ChannelDao
 import com.example.geminichatapp.data.local.db.ChatDao
 import com.example.geminichatapp.data.local.db.GeminiChatDatabase
@@ -10,7 +11,10 @@ import com.example.geminichatapp.data.model.ChannelEntity
 import com.example.geminichatapp.data.model.ChannelWithMessage
 import com.example.geminichatapp.data.model.MessageEntity
 import com.example.geminichatapp.data.model.Participant
+import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -114,7 +118,33 @@ class LocalServiceUnitTest {
 
     @Test
     fun whenMessageAddedInInterval_CheckDbReturnsTheExpectedValue() = runTest {
+        val chanelId = UUID.randomUUID()
+        fakeMessageEntityList(chanelId).forEach {msgEntity ->
+            mockChatDao.addMessage(msgEntity)
+        }
 
+        launch {
+            delay(500)
+            mockChatDao.addMessage(
+                MessageEntity(
+                    message = "Message 4",
+                    time = "Time 4",
+                    date = Date(),
+                    images = emptyList(),
+                    byWhom = Participant.MODEL,
+                    foreignChannelId = chanelId
+                )
+            )
+        }
+
+        mockChatDao.loadChats(chanelId).test {
+            val initialSize = fakeMessageEntityList(chanelId).size
+            val item = awaitItem()
+            assertThat(item).hasSize(initialSize)
+            val newItemList = awaitItem()
+            assertThat(newItemList).hasSize(initialSize.plus(1))
+            cancel()
+        }
     }
 
     @After
@@ -122,3 +152,30 @@ class LocalServiceUnitTest {
         mockDb.close()
     }
 }
+
+fun fakeMessageEntityList(channelId: UUID) = listOf(
+    MessageEntity(
+        message = "Message 1",
+        time = "Time 1",
+        date = Date(),
+        images = emptyList(),
+        byWhom = Participant.USER,
+        foreignChannelId = channelId
+    ),
+    MessageEntity(
+        message = "Message 2",
+        time = "Time 2",
+        date = Date(),
+        images = emptyList(),
+        byWhom = Participant.MODEL,
+        foreignChannelId = channelId
+    ),
+    MessageEntity(
+        message = "Message 3",
+        time = "Time 3",
+        date = Date(),
+        images = listOf("uriOne","uriTwo"),
+        byWhom = Participant.USER,
+        foreignChannelId = channelId
+    ),
+)
