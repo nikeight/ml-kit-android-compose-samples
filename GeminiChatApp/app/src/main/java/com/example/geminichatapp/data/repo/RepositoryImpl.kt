@@ -11,12 +11,13 @@ import com.example.geminichatapp.data.model.toEntity
 import com.example.geminichatapp.data.model.toMessage
 import com.example.geminichatapp.data.remote.INetworkService
 import com.example.geminichatapp.data.util.UriToBitmapConverter
+import com.example.geminichatapp.di.DispatcherProvider
 import com.example.geminichatapp.features.text_chat.Message
 import com.google.ai.client.generativeai.type.content
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.util.UUID
@@ -25,7 +26,8 @@ import javax.inject.Inject
 class RepositoryImpl @Inject constructor(
     private val networkService: INetworkService,
     private val localService: LocalService,
-    private val uriToBitmapConverter: UriToBitmapConverter
+    private val uriToBitmapConverter: UriToBitmapConverter,
+    private val dispatcher: DispatcherProvider,
 ) : Repository {
 
     override suspend fun fetchChannels(): Flow<List<ChannelWithMessage>> {
@@ -35,6 +37,7 @@ class RepositoryImpl @Inject constructor(
             }
             uniqueItem
         }.distinctUntilChanged()
+            .flowOn(dispatcher.ioDispatcher)
     }
 
     override suspend fun createChannel(channelEntity: ChannelEntity) {
@@ -50,10 +53,11 @@ class RepositoryImpl @Inject constructor(
             msgEntityList.map { msgEntity ->
                 msgEntity.toMessage()
             }
-        }
+        }.flowOn(dispatcher.ioDispatcher)
     }
 
     /**
+     * Todo: Create separate class to handle sync, hide the implementation
      * Fetches the local history first
      * Get the response from the GPT
      * Save to the DB the new message
@@ -99,7 +103,7 @@ class RepositoryImpl @Inject constructor(
                 MessageState.Failure,
             )
         }
-    }
+    }.flowOn(dispatcher.ioDispatcher)
 
     /**
      * Fetches the local history first
@@ -117,7 +121,7 @@ class RepositoryImpl @Inject constructor(
 
         emit(MessageState.Loading)
 
-        val bitmaps = withContext(Dispatchers.Default) {
+        val bitmaps = withContext(dispatcher.defaultDispatcher) {
             uriToBitmapConverter.convert(
                 messageEntity.images ?: emptyList(),
             )
@@ -156,5 +160,5 @@ class RepositoryImpl @Inject constructor(
                 MessageState.Failure,
             )
         }
-    }
+    }.flowOn(dispatcher.ioDispatcher)
 }

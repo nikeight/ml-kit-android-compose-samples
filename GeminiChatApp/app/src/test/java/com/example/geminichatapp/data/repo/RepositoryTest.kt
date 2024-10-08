@@ -6,6 +6,8 @@ import com.example.geminichatapp.data.model.MessageEntity
 import com.example.geminichatapp.data.model.Participant
 import com.example.geminichatapp.data.remote.INetworkService
 import com.example.geminichatapp.data.util.UriToBitmapConverter
+import com.example.geminichatapp.di.DispatcherProvider
+import com.example.geminichatapp.rules.TestDispatcherRule
 import com.google.ai.client.generativeai.type.GenerateContentResponse
 import com.google.common.truth.Truth.assertThat
 import io.mockk.clearAllMocks
@@ -16,10 +18,10 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import java.util.Date
 import java.util.UUID
@@ -30,17 +32,27 @@ class RepositoryTest {
     private lateinit var networkService: INetworkService
     private lateinit var localService: LocalService
     private lateinit var imageConverterService: UriToBitmapConverter
+    private lateinit var dispatcherProvider: DispatcherProvider
+
+    @get:Rule
+    val instantTaskExecutorRule = TestDispatcherRule()
 
     @Before
     fun setUp() {
         networkService = mockk<INetworkService>(relaxed = true)
         localService = mockk<LocalService>(relaxed = true)
         imageConverterService = mockk(relaxed = true)
-        sut = RepositoryImpl(networkService, localService, imageConverterService)
+        dispatcherProvider = DispatcherProvider()
+        sut = RepositoryImpl(
+            networkService,
+            localService,
+            imageConverterService,
+            dispatcher = dispatcherProvider,
+        )
     }
 
     @Test
-    fun whenAppLaunches_FetchAllChannels() = runBlocking {
+    fun whenAppLaunches_FetchAllChannels() = runTest {
         coEvery {
             localService.fetchChannels()
         } returns flowOf(fakeChannelsWithMessageList())
@@ -54,7 +66,7 @@ class RepositoryTest {
     }
 
     @Test
-    fun whenNewMessageIsSent_FetchHistory() = runBlocking {
+    fun whenNewMessageIsSent_FetchHistory() = runTest {
         val channelId = UUID.randomUUID()
 
         coEvery {
@@ -112,7 +124,7 @@ class RepositoryTest {
     }
 
     @Test
-    fun whenImageMessageSent_VerifyDbDataSyncAndSuccessResponse() = runBlocking {
+    fun whenImageMessageSent_VerifyDbDataSyncAndSuccessResponse() = runTest {
         val result = sut.sendImagePrompt(fakeMessageList()[2]).toList()
 
         coEvery {
@@ -199,7 +211,7 @@ class RepositoryTest {
     }
 
     @After
-    fun clear(){
+    fun clear() {
         clearAllMocks()
     }
 }
@@ -242,7 +254,7 @@ fun fakeMessageList() = listOf(
         message = "Message 3",
         time = "Time 3",
         date = Date(),
-        images = listOf("uriOne","uriTwo"),
+        images = listOf("uriOne", "uriTwo"),
         byWhom = Participant.MODEL,
         foreignChannelId = UUID.randomUUID()
     ),
