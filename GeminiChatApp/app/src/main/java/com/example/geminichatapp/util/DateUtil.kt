@@ -1,6 +1,9 @@
 package com.example.geminichatapp.util
 
 import android.icu.util.Calendar
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.Date
 
 // For Chat Records
@@ -26,20 +29,19 @@ fun Date.getCurrentTime(): String {
 }
 
 // For Map Key
-fun Date.getDateAsYearMonthDay(): String {
-    val calendar = Calendar.getInstance()
-    calendar.time = this
-    val year = calendar.get(Calendar.YEAR)
-    val month = calendar.get(Calendar.MONTH)
-    val date = calendar.get(Calendar.DATE)
-    return buildString {
-        append(year)
-        append("-")
-        append(month.plus(1))
-        append("-")
-        append(date)
-    }
-}
+//fun Date.getDateAsYearMonthDay(calendar: Calendar): String {
+//    calendar.time = this
+//    val year = calendar.get(Calendar.YEAR)
+//    val month = calendar.get(Calendar.MONTH)
+//    val date = calendar.get(Calendar.DATE)
+//    return buildString {
+//        append(year)
+//        append("-")
+//        append(month.plus(1))
+//        append("-")
+//        append(date)
+//    }
+//}
 
 // For Stick Header
 fun Date.getDateAsDayDateAndMonth(): String {
@@ -67,5 +69,24 @@ fun Int.getDayFromCode(): String {
         Calendar.TUESDAY -> "Tue"
         Calendar.MONDAY -> "Mon"
         else -> ""
+    }
+}
+
+fun Date.localDateTime(): LocalDateTime {
+    return Instant.ofEpochMilli(this.time)
+        .atZone(ZoneId.systemDefault()).toLocalDateTime()
+}
+
+fun Date.getDateAsYearMonthDay(): String {
+    val localDateTime = localDateTime()
+    val year = localDateTime.year
+    val month = localDateTime.month
+    val date = localDateTime.dayOfMonth
+    return buildString {
+        append(year)
+        append("-")
+        append(month)
+        append("-")
+        append(date)
     }
 }

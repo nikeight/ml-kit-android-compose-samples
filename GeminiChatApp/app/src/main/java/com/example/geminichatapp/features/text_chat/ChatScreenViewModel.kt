@@ -7,14 +7,16 @@ import com.example.geminichatapp.data.model.ChannelEntity
 import com.example.geminichatapp.data.model.MessageEntity
 import com.example.geminichatapp.data.repo.MessageState
 import com.example.geminichatapp.data.repo.Repository
+import com.example.geminichatapp.di.DispatcherProvider
 import com.example.geminichatapp.util.getDateAsYearMonthDay
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -23,14 +25,21 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ChatScreenViewModel @Inject constructor(
-    private val repository: Repository
+    private val repository: Repository,
+    private val dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<UiState> =
         MutableStateFlow(UiState())
 
     val uiState: StateFlow<UiState> =
-        _uiState.asStateFlow()
+        _uiState.onStart {
+            collectLatestMsg()
+        }.stateIn(
+            scope = viewModelScope,
+            started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
+            initialValue = UiState()
+        )
 
     private var _channelId: UUID? = null
 
@@ -39,7 +48,7 @@ class ChatScreenViewModel @Inject constructor(
     fun sendMessage(
         messageEntity: MessageEntity,
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcherProvider.mainDispatcher) {
             repository.sendMessage(messageEntity)
                 .collectLatestAndUpdateState(state = _uiState)
         }
@@ -47,13 +56,12 @@ class ChatScreenViewModel @Inject constructor(
 
     fun setChannelId(passedChannelId: UUID) {
         _channelId = passedChannelId
-        collectLatestMsg()
     }
 
     //TODO : To much of repeating loops, optimize it
     private fun collectLatestMsg() {
         // Convert list of Item to Map
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcherProvider.mainDispatcher) {
             _channelId?.let { safeChannelId ->
                 repository.fetchAllHistory(safeChannelId)
                     .distinctUntilChanged()
@@ -61,7 +69,10 @@ class ChatScreenViewModel @Inject constructor(
                         newMessage?.let { newMessagesList ->
                             val map = mutableMapOf<String, MutableList<Message>>()
                             newMessagesList.map { newMessage ->
-                                map.getOrPut(newMessage.date.getDateAsYearMonthDay()) { mutableListOf() }
+                                map.getOrPut(
+                                    newMessage.date
+                                        .getDateAsYearMonthDay(),
+                                ) { mutableListOf() }
                                     .also {
                                         it.add(newMessage)
                                     }
@@ -87,7 +98,7 @@ class ChatScreenViewModel @Inject constructor(
         messageId: Int?,
         messageLastDate: Date?,
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcherProvider.mainDispatcher) {
             _channelId?.let { safeChannelId ->
                 messageId?.let { safeMsgId ->
                     repository.updateChannel(
@@ -104,7 +115,7 @@ class ChatScreenViewModel @Inject constructor(
     }
 
     fun sendImagePrompt(messageEntity: MessageEntity) {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcherProvider.mainDispatcher){
             repository.sendImagePrompt(messageEntity)
                 .collectLatestAndUpdateState(state = _uiState)
         }

@@ -16,11 +16,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.geminichatapp.common.ChatBubbleItem
 import com.example.geminichatapp.common.ChatStickyHeader
 import com.example.geminichatapp.common.MessageTextField
@@ -35,7 +35,7 @@ fun ChatScreen(
     modifier: Modifier = Modifier,
     chatScreenViewModel: ChatScreenViewModel = hiltViewModel()
 ) {
-    val chatUiState by chatScreenViewModel.uiState.collectAsState()
+    val chatUiState by chatScreenViewModel.uiState.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
 
     LaunchedEffect(chatUiState.chatListWithDate) {

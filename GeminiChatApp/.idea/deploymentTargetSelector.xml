@@ -16,9 +16,6 @@
       <SelectionState runConfigName="LocalServiceUnitTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="whenMessageAddedInInterval_CheckDbReturnsTheExpectedValue()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
     </selectionStates>
   </component>
 </project>
