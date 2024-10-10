@@ -13,9 +13,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.geminichatapp.R
@@ -33,7 +35,7 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Hello,\nWelcome",
+            text = "Hello &\nWelcome",
             style = TextStyle(
                 fontSize = 54.sp,
                 textAlign = TextAlign.Center,
@@ -44,6 +46,7 @@ fun LoginScreen(
             painter = painterResource(id = R.drawable.gemini_img),
             contentDescription = "gemini_img",
             modifier.size(94.dp)
+                .testTag("gemini_logo_img")
         )
 
         Text(
@@ -55,7 +58,7 @@ fun LoginScreen(
         )
 
         Text(
-            text = "Provide your own API Key at Local config.\nGo through `Docs`",
+            text = "Please provide your own Gemini API key,\n in order to continue",
             style = TextStyle(
                 fontSize = 14.sp,
                 color = Color.Gray,
@@ -78,4 +81,10 @@ fun LoginScreen(
             )
         )
     }
+}
+
+@Preview
+@Composable
+private fun LoginScreenPreview() {
+    LoginScreen {}
 }

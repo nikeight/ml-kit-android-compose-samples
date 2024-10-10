@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 
@@ -27,7 +28,8 @@ fun AvatarsImage(
         modifier = modifier
             .size(32.dp)
             .clip(CircleShape)
-            .background(backgroundColor),
+            .background(backgroundColor)
+            .testTag("avatar_image"),
         contentAlignment = Alignment.Center,
     ) {
         if (isModel) {

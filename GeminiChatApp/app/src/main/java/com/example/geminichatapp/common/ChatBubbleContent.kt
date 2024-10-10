@@ -8,13 +8,14 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -61,21 +62,21 @@ fun ChatBubbleContent(
         )
     }
 
-    Divider(
+    HorizontalDivider(
         thickness = 1.dp,
-        color = Color.Black,
+        color = Color.Black
     )
 
     imagesList?.let { list ->
-        LazyRow {
+        LazyRow(modifier = modifier.testTag("images_row")){
             items(list) { imageUri ->
                 LocalImageView(imageSize = imageSize, filePath = imageUri)
             }
         }
 
-        Divider(
+        HorizontalDivider(
             thickness = 1.dp,
-            color = Color.Black,
+            color = Color.Black
         )
     }
 
