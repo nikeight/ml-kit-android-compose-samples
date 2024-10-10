@@ -12,7 +12,7 @@ import com.example.geminichatapp.data.model.toMessage
 import com.example.geminichatapp.data.remote.INetworkService
 import com.example.geminichatapp.data.util.UriToBitmapConverter
 import com.example.geminichatapp.di.DispatcherProvider
-import com.example.geminichatapp.features.text_chat.Message
+import com.example.geminichatapp.features.chat.Message
 import com.google.ai.client.generativeai.type.content
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged

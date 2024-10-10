@@ -1,4 +1,4 @@
-package com.example.geminichatapp.features.text_chat
+package com.example.geminichatapp.features.chat
 
 import com.example.geminichatapp.data.model.Participant
 import java.util.Date

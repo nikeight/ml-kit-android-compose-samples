@@ -8,7 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.geminichatapp.features.channel.ChannelListScreen
 import com.example.geminichatapp.features.login.LoginScreen
-import com.example.geminichatapp.features.text_chat.ChatScreen
+import com.example.geminichatapp.features.chat.ChatScreen
 import java.util.UUID
 
 @Composable

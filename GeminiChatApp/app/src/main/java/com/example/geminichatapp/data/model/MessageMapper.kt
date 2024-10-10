@@ -1,6 +1,6 @@
 package com.example.geminichatapp.data.model
 
-import com.example.geminichatapp.features.text_chat.Message
+import com.example.geminichatapp.features.chat.Message
 
 fun MessageEntity.toMessage(): Message {
     return Message(

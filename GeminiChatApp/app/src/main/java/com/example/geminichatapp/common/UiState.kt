@@ -1,7 +1,7 @@
 package com.example.geminichatapp.common
 
 import com.example.geminichatapp.data.model.ChannelWithMessage
-import com.example.geminichatapp.features.text_chat.Message
+import com.example.geminichatapp.features.chat.Message
 
 
 data class UiState(

@@ -8,7 +8,7 @@ import androidx.compose.ui.test.printToLog
 import org.junit.Rule
 import org.junit.Test
 
-class ChannelScreenContentUiTest{
+class LoginScreenContentUiTest{
 
     @get:Rule
     val composeTestRule = createComposeRule()

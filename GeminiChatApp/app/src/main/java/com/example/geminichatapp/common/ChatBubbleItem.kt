@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.unit.dp
 import com.example.geminichatapp.data.model.Participant
-import com.example.geminichatapp.features.text_chat.Message
+import com.example.geminichatapp.features.chat.Message
 
 @Composable
 fun ChatBubbleItem(

@@ -3,7 +3,7 @@ package com.example.geminichatapp.data.repo
 import com.example.geminichatapp.data.model.ChannelEntity
 import com.example.geminichatapp.data.model.ChannelWithMessage
 import com.example.geminichatapp.data.model.MessageEntity
-import com.example.geminichatapp.features.text_chat.Message
+import com.example.geminichatapp.features.chat.Message
 import kotlinx.coroutines.flow.Flow
 import java.util.UUID
 

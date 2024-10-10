@@ -1,4 +1,4 @@
-package com.example.geminichatapp.features.text_chat
+package com.example.geminichatapp.features.chat
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -16,26 +16,28 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.geminichatapp.common.ChatBubbleItem
 import com.example.geminichatapp.common.ChatStickyHeader
 import com.example.geminichatapp.common.MessageTextField
+import com.example.geminichatapp.common.UiState
+import com.example.geminichatapp.data.model.MessageEntity
 import com.example.geminichatapp.ui.components.ErrorMessage
 import com.example.geminichatapp.ui.components.MessageGeneratingAnimation
 import java.util.UUID
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ChatScreen(
-    channelId: UUID,
+fun ChatScreenContent(
     modifier: Modifier = Modifier,
-    chatScreenViewModel: ChatScreenViewModel = hiltViewModel()
+    channelId: UUID,
+    chatUiState: UiState,
+    sendTextMessageCallBack: (MessageEntity) -> Unit,
+    sendImageMessageCallBack: (MessageEntity) -> Unit,
 ) {
-    val chatUiState by chatScreenViewModel.uiState.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
 
     LaunchedEffect(chatUiState.chatListWithDate) {
@@ -44,32 +46,22 @@ fun ChatScreen(
         )
     }
 
-    LaunchedEffect(key1 = Unit) {
-        chatScreenViewModel.setChannelId(channelId)
-    }
-
     Scaffold(
         modifier = modifier.fillMaxSize(),
         bottomBar = {
             MessageTextField(
-                onSendMessage = { message ->
-                    chatScreenViewModel.sendMessage(
-                        messageEntity = message,
-                    )
-                },
-                onSendImagePrompt = { imagePrompt ->
-                    chatScreenViewModel.sendImagePrompt(
-                        messageEntity = imagePrompt
-                    )
-                },
+                onSendMessage = sendTextMessageCallBack,
+                onSendImagePrompt = sendImageMessageCallBack,
                 channelId = channelId
             )
         }
     ) {
         LazyColumn(
+            modifier = modifier
+                .padding(it)
+                .testTag("chat_list"),
             reverseLayout = false,
             state = listState,
-            modifier = modifier.padding(it),
             verticalArrangement = Arrangement.Center
         ) {
             chatUiState.chatListWithDate?.forEach { (key, list) ->
@@ -114,4 +106,15 @@ fun ChatScreen(
             }
         }
     }
+}
+
+@Preview
+@Composable
+private fun ChatScreenContentPreview() {
+    ChatScreenContent(
+        channelId = UUID.randomUUID(),
+        chatUiState = UiState(),
+        sendTextMessageCallBack = {},
+        sendImageMessageCallBack = {}
+    )
 }

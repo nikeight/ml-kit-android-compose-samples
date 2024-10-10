@@ -9,7 +9,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.ElevatedCard
@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
@@ -100,6 +101,7 @@ fun MessageTextField(
                 Icon(
                     Icons.Rounded.Add,
                     contentDescription = stringResource(R.string.add_image),
+                    modifier = Modifier.testTag("add_image_icon"),
                 )
             }
 
@@ -114,6 +116,7 @@ fun MessageTextField(
                     .align(Alignment.CenterVertically)
                     .fillMaxWidth()
                     .weight(0.85f)
+                    .testTag("message_text_field")
             )
             IconButton(
                 onClick = {
@@ -156,10 +159,11 @@ fun MessageTextField(
                     .weight(0.15f)
             ) {
                 Icon(
-                    Icons.Default.Send,
+                    Icons.AutoMirrored.Filled.Send,
                     contentDescription = stringResource(R.string.action_send),
-                    modifier = Modifier
-                )
+                    modifier = Modifier.testTag("send_msg_icon"),
+
+                    )
             }
         }
     }
